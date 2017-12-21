@@ -1,7 +1,6 @@
 //#include <GL/glew.h> // Include the GLEW header file
 #include <GL/glut.h> // Include the GLUT header file
 
-#include <cstdio>
 #include <vector>
 
 #include "boost\polygon\voronoi.hpp"
@@ -23,12 +22,15 @@ struct Point {
 
 	Point(double a, double b) : x(a), y(b) {}
 	friend bool operator==(const Point& l, const Point& r);
-};
-
-int cFrameXl = -20;
-int cFrameXr = 20;
-int cFrameYu = 20;
-int cFrameYd = -20;
+};	
+const int numberOfPoints = 50;
+const int razm = 30;
+const int cFrameXl = 0;
+const int cFrameXr = razm;
+const int cFrameYu = razm;
+const int cFrameYd = 0;
+const int scale = 10;
+const int shift = 200;
 
 bool operator==(const Point& l, const Point& r) {
 	return l.x == r.x && l.y == r.y;
@@ -76,7 +78,6 @@ double distance(Point a, Point b) {
 void getInfPoints(vector<pair<Point, Point>> & pBoundary, vector<pair<Point, Point>>& InfPoints)
 {
 	InfPoints.clear();
-	//	cout << "getInfPoints\n";
 	for (auto point = pBoundary.begin(); point != pBoundary.end(); ++point) {
 		Point intersect{ NULL, NULL };
 		Point parabolaVertex{ NULL, NULL };
@@ -123,7 +124,7 @@ void getInfPoints(vector<pair<Point, Point>> & pBoundary, vector<pair<Point, Poi
 		}
 
 		auto pointCheckBoundary = pBoundary.begin();
-		double curDist = 100000000000;
+		double curDist = 100000000;
 		for (auto pointCheckIntersect = InfPoints.begin(); pointCheckIntersect != InfPoints.end(); ++pointCheckIntersect) {
 			auto A = (*pointCheckIntersect).first;
 			auto B = (*pointCheckIntersect).second;
@@ -170,8 +171,7 @@ void getInfPoints(vector<pair<Point, Point>> & pBoundary, vector<pair<Point, Poi
 		for (auto pointCheckIntersect = draw.begin(); pointCheckIntersect != draw.end(); ++pointCheckIntersect) {
 			auto A = (*pointCheckIntersect).first;
 			auto B = (*pointCheckIntersect).second;
-
-			auto check = checkIntersaction(parabolaVertex, intersect, A, B);
+  			auto check = checkIntersaction(parabolaVertex, intersect, A, B);
 
 			if (A.x > B.x) swap(A.x, B.x);
 			if (A.y > B.y) swap(A.y, B.y);
@@ -195,8 +195,6 @@ void getInfPoints(vector<pair<Point, Point>> & pBoundary, vector<pair<Point, Poi
 		}
 		pair<Point, Point> toInfPoints(parabolaVertex, intersect);
 		InfPoints.push_back(toInfPoints);
-
-		cout << x2 << ' ' << y2 << " : " << parabolaVertex.x << ' ' << parabolaVertex.y << ' ' << intersect.x << ' ' << intersect.y << endl;
 	}
 }
 
@@ -220,10 +218,10 @@ void display()
 	for (auto point = pDraw.begin(); point != pDraw.end(); ++point) {
 		(kol < 8 ? glColor3f(0.0, 1.0, 0.0) : glColor3f(0.0, 0.0, 1.0));
 
-		glVertex2i((*point).x * 10 + w + 200 + 0.01, (*point).y * 10 + h + 200 + 0.01);
-		glVertex2i((*point).x * 10 + w + 200 + 0.01, (*point).y * 10 + h + 200 - 0.01);
-		glVertex2i((*point).x * 10 + w + 200 - 0.01, (*point).y * 10 + h + 200 + 0.01);
-		glVertex2i((*point).x * 10 + w + 200 - 0.01, (*point).y * 10 + h + 200 - 0.01);
+		glVertex2i((*point).x * scale + w + shift + 0.01, (*point).y * scale + h + shift + 0.01);
+		glVertex2i((*point).x * scale + w + shift + 0.01, (*point).y * scale + h + shift - 0.01);
+		glVertex2i((*point).x * scale + w + shift - 0.01, (*point).y * scale + h + shift + 0.01);
+		glVertex2i((*point).x * scale + w + shift - 0.01, (*point).y * scale + h + shift - 0.01);
 
 		++kol;
 		if (kol == 8) break;
@@ -233,55 +231,44 @@ void display()
 	glBegin(GL_LINES);
 	for (auto point = draw.begin(); point != draw.end(); ++point) {
 		glColor3f(1.0, 1.0, 1.0);
-		glVertex2i((*point).first.x * 10 + w + 200, (*point).first.y * 10 + h + 200);
-		glVertex2i((*point).second.x * 10 + w + 200, (*point).second.y * 10 + h + 200);
+		glVertex2i((*point).first.x * scale + w + shift, (*point).first.y * scale + h + shift);
+		glVertex2i((*point).second.x * scale + w + shift, (*point).second.y * scale + h + shift);
 	}
 
-	cout << "pBoundary\n";
-	for (auto point = pBoundary.begin(); point != pBoundary.end(); ++point) {
-		cout << (*point).first.x << ' ' << (*point).first.y << ' ' << (*point).second.x << ' ' << (*point).second.y << endl;
-	}
-
+	glColor3f(0.5, 0.5, 0.5);
+	glVertex2i(cFrameXl * scale + w + shift, cFrameYu * scale + h + shift);
+	glVertex2i(cFrameXr * scale + w + shift, cFrameYu * scale + h + shift);
 
 	glColor3f(0.5, 0.5, 0.5);
-	glVertex2i(cFrameXl * 10 + w + 200, cFrameYu * 10 + h + 200);
-	glVertex2i(cFrameXr * 10 + w + 200, cFrameYu * 10 + h + 200);
-
-
-	glColor3f(0.5, 0.5, 0.5);
-	glVertex2i(cFrameXl * 10 + w + 200, cFrameYd * 10 + h + 200);
-	glVertex2i(cFrameXr * 10 + w + 200, cFrameYd * 10 + h + 200);
-
+	glVertex2i(cFrameXl * scale + w + shift, cFrameYd * scale + h + shift);
+	glVertex2i(cFrameXr * scale + w + shift, cFrameYd * scale + h + shift);
 
 	glColor3f(0.5, 0.5, 0.5);
-	glVertex2i(cFrameXl * 10 + w + 200, cFrameYu * 10 + h + 200);
-	glVertex2i(cFrameXl * 10 + w + 200, cFrameYd * 10 + h + 200);
-
+	glVertex2i(cFrameXl * scale + w + shift, cFrameYu * scale + h + shift);
+	glVertex2i(cFrameXl * scale + w + shift, cFrameYd * scale + h + shift);
 
 	glColor3f(0.5, 0.5, 0.5);
-	glVertex2i(cFrameXr * 10 + w + 200, cFrameYu * 10 + h + 200);
-	glVertex2i(cFrameXr * 10 + w + 200, cFrameYd * 10 + h + 200);
+	glVertex2i(cFrameXr * scale + w + shift, cFrameYu * scale + h + shift);
+	glVertex2i(cFrameXr * scale + w + shift, cFrameYd * scale + h + shift);
 
 	vector<pair<Point, Point>> InfPoints;
 	vector<pair<Point, Point>> a;
 	for (auto point = pBoundary.end() - 1; point != pBoundary.begin(); --point) a.push_back(*point);
 	a.push_back(*pBoundary.begin());
 
-
 	getInfPoints(a, InfPoints);
 	auto pointBoundary = a.begin();
 
 	for (auto point = InfPoints.begin(); point != InfPoints.end(); ++point) {
 		glColor3f(0.5, 0.5, 0.5);
-		glVertex2i((*point).first.x * 10 + w + 200, (*point).first.y * 10 + h + 200);
-		glVertex2i((*point).second.x * 10 + w + 200, (*point).second.y * 10 + h + 200);
+		glVertex2i((*point).first.x * scale + w + shift, (*point).first.y * scale + h + shift);
+		glVertex2i((*point).second.x * scale + w + shift, (*point).second.y * scale + h + shift);
 
 		glColor3f(0.5, 0.5, 0.5);
-		glVertex2i((*point).first.x * 10 + w + 200, (*point).first.y * 10 + h + 200);
-		glVertex2i((*pointBoundary).second.x * 10 + w + 200, (*pointBoundary).second.y * 10 + h + 200);
+		glVertex2i((*point).first.x * scale + w + shift, (*point).first.y * scale + h + shift);
+		glVertex2i((*pointBoundary).second.x * scale + w + shift, (*pointBoundary).second.y * scale + h + shift);
 
 		++pointBoundary;
-
 	}
 
 	glEnd();
@@ -308,13 +295,6 @@ namespace boost {
 	}
 }
 
-
-
-
-void draw_line(double a, double b, double c, double d) {
-	cout << a << ' ' << b << ' ' << c << ' ' << d << endl;
-}
-
 void toDraw_line(double a, double b, double c, double d) {
 	Point first{ a,b };
 	Point second{ c,d };
@@ -330,157 +310,110 @@ void toDraw_point(Point a) {
 Point FindMidPoint(Point pInputSet1, Point pInputSet2) {
 	return Point((pInputSet1.x + pInputSet1.x) / 2, (pInputSet1.y + pInputSet2.y) / 2);
 }
-
 int main(int argc, char **argv) {
-	// Preparing Input Geometries.
-	std::vector<Point> points;
 
-	/*points.push_back(Point(0, 0));
-	points.push_back(Point(1, 2));
-	points.push_back(Point(3, 1));
-	points.push_back(Point(4, 2));
-	points.push_back(Point(6, 1));
-	points.push_back(Point(2, -3));
-	points.push_back(Point(4, -1));
-	points.push_back(Point(-1, -1));
+	vector<Point> points;
+	points.clear();
+	pBoundary.clear();
+	draw.clear();
+	infDraw.clear();
 
-	points.push_back(Point(3, 2));
-	points.push_back(Point(7, 4));
-	points.push_back(Point(5, 0));
-	points.push_back(Point(-4, -1));
-	points.push_back(Point(-3, 2));
-	*/
-
-
-	points.push_back(Point(0, 1));
-	points.push_back(Point(0, 2));
-
-	points.push_back(Point(-4, -1));
-	//points.push_back(Point(-3, 2));
-	/*points.push_back(Point(3, 3));
-	points.push_back(Point(0, 0));
-	points.push_back(Point(3, 0));
-	points.push_back(Point(0, 3));
-
-	points.push_back(Point(5,5));
-	points.push_back(Point(4, -4));
-	points.push_back(Point(0, 6));*/
-
-
-
-	voronoi_diagram<double> vd;
-	construct_voronoi(points.begin(), points.end(), &vd);
-	{
-		printf("Traversing Voronoi graph.\n");
-	}
-
-	printf("Number of edges (including secondary) around the Voronoi cells:\n");
-	for (voronoi_diagram<double>::const_edge_iterator it = vd.edges().begin();
-		it != vd.edges().end(); ++it) {
-		std::size_t cnt = it->cell()->color();
-		it->cell()->color(cnt + 1);
-	}
-
-
-	unsigned int cell_index = 0;
-	for (voronoi_diagram<double>::const_cell_iterator it = vd.cells().begin();
-		it != vd.cells().end(); ++it) {
-		Point boundary(0, 0);
-		int flag = 0;
-		if (it->contains_point()) {
-
-			std::size_t index = it->source_index();
-			Point p = points[index];
-			toDraw_point(p);
-			printf("Cell #%ud contains a point: (%d, %d).",
-				cell_index, x(p), y(p));
-			int flag = 0;
-			if (it->incident_edge()->is_finite()) {
-				cout << it->incident_edge()->vertex0()->x() << ' ' << it->incident_edge()->vertex0()->y() << "\n";
-				cout << it->incident_edge()->vertex1()->x() << ' ' << it->incident_edge()->vertex1()->y() << "\n";
-			}
-			else
-			{
-				if (it->incident_edge()->vertex0()) {
-					boundary.x = it->incident_edge()->vertex0()->x(), boundary.y = it->incident_edge()->vertex0()->y();
-					pair<Point, Point> add{ p, boundary };
-					pBoundary.push_back(add);
-				}
-				if (it->incident_edge()->vertex1()) {
-					boundary.x = it->incident_edge()->vertex1()->x(), boundary.y = it->incident_edge()->vertex1()->y();
-					pair<Point, Point> add{ p, boundary };
-					pBoundary.push_back(add);
-				}
+	for (int i = 0; i < numberOfPoints; ++i) {
+		bool flag = true;
+		int x = 0;
+		int y = 0;
+		while (flag) {
+			x = rand() % razm;
+			y = rand() % razm;
+			flag = false;
+			for (auto p = points.begin(); p != points.end(); ++p) if ((*p).x == x && (*p).y == y) {
+				flag = true;
+				break;
 			}
 		}
-		++cell_index;
-		cout << endl;
-	}
-	std::cout << std::endl;
-
-	for (auto point = pBoundary.begin(); point != pBoundary.end(); ++point)
-	{
-		draw_line((*point).first.x, (*point).first.y, (*point).second.x, (*point).second.y);
+		points.push_back(Point(x, y));
 	}
 
-	cout << "vertex" << endl;
-	for (voronoi_diagram<double>::const_vertex_iterator it = vd.vertices().begin();
-		it != vd.vertices().end(); ++it) {
-		cout << it->x();
-		cout << ' ' << it->y() << endl;
-		Point toDraw{ it->x(), it->y() };
-		toDraw_point(toDraw);
-	}
-	cout << "***" << endl;
+		voronoi_diagram<double> vd;
+		construct_voronoi(points.begin(), points.end(), &vd);
 
-	for (auto cell = vd.cells().begin(); cell != vd.cells().end(); ++cell) {
-		cout << "ceeeeel\n";
-		auto edge = cell->incident_edge();
-		do {
-			cout << "*" << endl;
+		for (voronoi_diagram<double>::const_edge_iterator it = vd.edges().begin();
+			it != vd.edges().end(); ++it) {
+			std::size_t cnt = it->cell()->color();
+			it->cell()->color(cnt + 1);
+		}
 
-			if (edge->is_primary())
-			{
-				if (edge->is_finite())
-				{
-					if (edge->cell()->source_index() <
-						edge->twin()->cell()->source_index())
-					{
-						draw_line(edge->vertex0()->x(), edge->vertex0()->y(),
-							edge->vertex1()->x(), edge->vertex1()->y());
-						toDraw_line(edge->vertex0()->x(), edge->vertex0()->y(),
-							edge->vertex1()->x(), edge->vertex1()->y());
-						Point vertex0{ edge->vertex0()->x() ,  edge->vertex0()->y() };
-						Point vertex1{ edge->vertex1()->x() , edge->vertex1()->y() };
-						toDraw_point(vertex0);
-						toDraw_point(vertex1);
+		unsigned int cell_index = 0;
+		for (voronoi_diagram<double>::const_cell_iterator it = vd.cells().begin();
+			it != vd.cells().end(); ++it) {
+			Point boundary(0, 0);
+			int flag = 0;
+			if (it->contains_point()) {
+
+				std::size_t index = it->source_index();
+				Point p = points[index];
+				toDraw_point(p);
+
+				int flag = 0;
+				if (!(it->incident_edge()->is_finite())) {
+					if (it->incident_edge()->vertex0()) {
+						boundary.x = it->incident_edge()->vertex0()->x(), boundary.y = it->incident_edge()->vertex0()->y();
+						pair<Point, Point> add{ p, boundary };
+						pBoundary.push_back(add);
 					}
-				}
-				else
-				{
-					auto v0 = edge->vertex0();
-					if (v0)
-					{
-						cout << "Marina style: \n";
-						Point pFound{ v0->x(), v0->y() };
-						for (auto point = pBoundary.begin(); point != pBoundary.end(); ++point) {
-							if ((*point).second == pFound)
-							{
-								draw_line(v0->x(), v0->y(), (*point).first.x, (*point).first.y);
-								Point vertex0{ v0->x() ,  v0->y() };
-								Point vertex1{ (*point).first.x ,  (*point).first.y };
-								toDraw_point(vertex0);
-								pair<Point, Point> toInfDraw(vertex0, vertex1);
-								infDraw.push_back(toInfDraw);
-							}
-						}
-						cout << "Marina style end. \n";
+					if (it->incident_edge()->vertex1()) {
+						boundary.x = it->incident_edge()->vertex1()->x(), boundary.y = it->incident_edge()->vertex1()->y();
+						pair<Point, Point> add{ p, boundary };
+						pBoundary.push_back(add);
 					}
 				}
 			}
-			edge = edge->next();
-		} while (edge != cell->incident_edge());
-	}
+			++cell_index;
+		}
+
+		for (voronoi_diagram<double>::const_vertex_iterator it = vd.vertices().begin();
+			it != vd.vertices().end(); ++it) {
+			Point toDraw{ it->x(), it->y() };
+			toDraw_point(toDraw);
+		}
+		for (auto cell = vd.cells().begin(); cell != vd.cells().end(); ++cell) {
+			auto edge = cell->incident_edge();
+			do {
+				if (edge->is_primary())
+				{
+					if (edge->is_finite())
+					{
+						if (edge->cell()->source_index() < edge->twin()->cell()->source_index())
+						{
+							toDraw_line(edge->vertex0()->x(), edge->vertex0()->y(), edge->vertex1()->x(), edge->vertex1()->y());
+							Point vertex0{ edge->vertex0()->x() ,  edge->vertex0()->y() };
+							Point vertex1{ edge->vertex1()->x() , edge->vertex1()->y() };
+							toDraw_point(vertex0);
+							toDraw_point(vertex1);
+						}
+					}
+					else
+					{
+						auto v0 = edge->vertex0();
+						if (v0)
+						{
+							Point pFound{ v0->x(), v0->y() };
+							for (auto point = pBoundary.begin(); point != pBoundary.end(); ++point) {
+								if ((*point).second == pFound)
+								{
+									Point vertex0{ v0->x() ,  v0->y() };
+									Point vertex1{ (*point).first.x ,  (*point).first.y };
+									toDraw_point(vertex0);
+									pair<Point, Point> toInfDraw(vertex0, vertex1);
+									infDraw.push_back(toInfDraw);
+								}
+							}
+						}
+					}
+				}
+				edge = edge->next();
+			} while (edge != cell->incident_edge());
+		}
 
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);
@@ -492,7 +425,6 @@ int main(int argc, char **argv) {
 	glutDisplayFunc(display);
 
 	glutMainLoop();
-
-	//	system("pause");
+	
 	return 0;
 }
