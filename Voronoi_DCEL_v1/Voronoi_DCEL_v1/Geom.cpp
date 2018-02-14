@@ -1,5 +1,6 @@
 #include "Geom.h"
 #include "Mesh.h"
+#include <math.h>
 
 Point intersection_lines(std::pair<Point, Point> line1, std::pair<Point, Point> line2) {
 	Point intersection_point{ NULL, NULL };
@@ -42,4 +43,14 @@ bool belong_mesh(Point input_point, Mesh voronoi_mesh) {
 	}
 
 	return (count_of_intersect_point % 2 != 0);
+}
+
+Straight_Line intersection_circles(Point center_point_first, Point center_point_second, double radius_first, double radius_second) {
+	Straight_Line intersection_circles_line (NULL, NULL, NULL);
+
+	intersection_circles_line.a = 2 * (center_point_second.x - center_point_first.x);
+	intersection_circles_line.b = 2 * (center_point_second.y - center_point_first.y);
+	intersection_circles_line.c = pow(center_point_first.x, 2) - pow(center_point_second.x, 2) + pow(center_point_first.y, 2) - pow(center_point_second.y, 2) - pow(radius_first, 2) + pow(radius_second, 2);
+	
+	return intersection_circles_line;
 }
