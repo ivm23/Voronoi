@@ -51,6 +51,11 @@ public:
 		return face_list[face_list.size() - 1];
 	}
 
+	inline Face* create_face(Point input_point) {
+		face_list.push_back(new Face(input_point));
+		return face_list[face_list.size() - 1];
+	}
+
 	inline unsigned int get_num_faces() const { 
 		return face_list.size();
 	}

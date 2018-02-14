@@ -1,11 +1,12 @@
 #include"Voronoi_Diagram.h"
 
-Voronoi_Diagram::Voronoi_Diagram() {
-
+Voronoi_Diagram::Voronoi_Diagram(Point first_input_point) {
+	
 	int index = voronoi_diagram.size();
 	voronoi_diagram.resize(index + 1);
 	voronoi_diagram[index] = new Mesh;
 	auto myMesh = voronoi_diagram[index];
+	myMesh->set_input_point(first_input_point);
 
 	Half_Edge* frame_left_half_edge = (*myMesh).create_half_edge();
 	Half_Edge* frame_up_half_edge = (*myMesh).create_half_edge();
@@ -22,10 +23,10 @@ Voronoi_Diagram::Voronoi_Diagram() {
 	Vertex* frame_right_down_point = (*myMesh).create_vertex(FRAME_RIGHT_DOWN);
 	Vertex* frame_right_up_point = (*myMesh).create_vertex(FRAME_RIGHT_UP);
 
-	Face* frame_left_face = (*myMesh).create_face();
-	Face* frame_up_face = (*myMesh).create_face();
-	Face* frame_right_face = (*myMesh).create_face();
-	Face* frame_down_face = (*myMesh).create_face();
+	Face* frame_left_face = (*myMesh).create_face(first_input_point);
+	Face* frame_up_face = (*myMesh).create_face(first_input_point);
+	Face* frame_right_face = (*myMesh).create_face(first_input_point);
+	Face* frame_down_face = (*myMesh).create_face(first_input_point);
 
 	(*frame_left_half_edge).set_origin(frame_left_down_point);
 	(*frame_up_half_edge).set_origin(frame_left_up_point);
@@ -117,4 +118,30 @@ Voronoi_Diagram::Voronoi_Diagram() {
 void Voronoi_Diagram::add_new_voronoi_cell(Point point_to_add) {
 
 }
+Mesh* Voronoi_Diagram::point_belong_mesh(Point point) {
+	for each (auto mesh in voronoi_diagram)
+	{
+		if (belong_mesh(point, (*mesh))) return mesh;
+	}
+}
 
+Mesh* Voronoi_Diagram::get_next_mesh_to_change(Straight_Line circle_intersection_line, Mesh* mesh) {
+	Face* face = (mesh->get_face_list())[0];
+	Point next_point_input;
+	for each (auto edge in face->get_boundary())
+	{	
+		std::pair<Point, Point> edge_points(edge->get_origin()->get_vertex_coordinates(), edge->get_twin()->get_origin()->get_vertex_coordinates());
+		Point intersect_point = intersection_lines(edge_points, circle_intersection_line);
+		
+		if (check_intersect_point_line_edge(intersect_point, edge_points)) {
+			next_point_input = edge->get_face()->get_input_point();
+			break;
+		}
+	}
+	
+	for each (auto mesh in voronoi_diagram)
+	{
+		if (mesh->get_input_point() == next_point_input) return mesh;
+	}
+	return NULL;
+}
