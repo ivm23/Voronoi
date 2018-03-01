@@ -36,7 +36,7 @@ struct Point {
 	friend Point operator* (double scalar_number, Point & point) {
 		return Point(scalar_number * point.x, scalar_number * point.y);
 	}
-	double err = 0.05;
+	double err = 0.5;
 	bool equals(Point other) {
 		return (other.x - err <= this->x && this->x <= other.x + err && other.y - err <= this->y && this->y <= other.y + err);
 	}
